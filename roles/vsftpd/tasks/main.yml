@@ -1,6 +1,0 @@
----
-# tasks file for vsftpd
-
-- yum:
-     name: "vsftpd"
-     state: present
