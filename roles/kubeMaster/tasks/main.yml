@@ -1,0 +1,78 @@
+- name: "yum repository for kubeadm"
+  yum_repository:
+        baseurl: "{{ url }}"
+        name: "{{ repo_name }}"
+        description: "{{ description }}"
+        state: present
+        gpgcheck: yes
+        enabled: yes
+        repo_gpgcheck: yes
+        gpgkey: "{{ gpgkey }}"
+  register: adm_status
+
+- name: "install docker on kube-master"
+  package:
+        name: "{{ item }}"
+        state: present
+  loop: "{{ requirement }}"
+  
+
+- name: "start the services of docker on kube-master"
+  service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+  loop:
+    - "{{ requirement[0] }}"
+    - "{{ requirement[1] }}"
+
+
+- name: "copy daemon.json to /etc/docker/"
+  copy:
+       src: "daemon.json"
+       dest: "/etc/docker/"
+  register: x
+
+- name: "restart service of docker if daemon.json chenge"
+  service:
+         name: "{{ requirement[0] }}"
+         state: restarted
+  when: x.changed == true
+
+
+- name: "pull kubeadm config image"
+  command: "kubeadm config images pull"
+  when: adm_status.changed  == true
+
+- name: "kubeadm intialization"
+  command: "{{ command }}"
+  when: adm_status.changed == true
+  ignore_errors: True
+
+- name: "create .kube directory"
+  file: 
+      path: "$HOME/.kube"
+      state: directory
+
+
+- name: "copy file from local to dest"
+  copy:
+      src: "/etc/kubernetes/admin.conf"
+      dest: "$HOME/.kube/config"
+      remote_src: yes
+  register: status
+
+- name: "change permission of files $HOME/.kube/config"
+  file:
+      path: "$HOME/.kube/config"
+      state: touch
+      owner: "{{ ansible_user_uid }}"
+      group: "{{ ansible_user_gid }}"
+  when: status.changed == true
+
+- name: "drop caches"
+  shell: "{{ item }}"
+  loop: "{{ lists }}"
+  when: adm_status.changed == true
+
+

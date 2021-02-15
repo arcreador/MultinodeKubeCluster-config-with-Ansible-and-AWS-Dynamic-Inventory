@@ -1,0 +1,8 @@
+---
+# tasks file for mariadb
+
+- yum:
+     name: 
+     - mariadb
+     state: latest
+

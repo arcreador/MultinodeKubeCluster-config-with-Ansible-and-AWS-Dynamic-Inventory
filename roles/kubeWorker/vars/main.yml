@@ -1,0 +1,22 @@
+---
+# vars file for kubeWorker
+
+mytext: |
+   net.bridge.bridge-nf-call-ip6tables = 1
+   net.bridge.bridge-nf-call-iptables = 1
+requirement:
+        - "docker"
+        - "kubelet"
+        - "kubeadm"
+        - "kubectl"
+        - "iproute-tc"
+
+
+url: 'https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch'
+repo_name: "Kubernetes"
+description: "yum repository for kube-worker"
+gpgkey: "https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+
+
+master_token: "kubeadm token create  --print-join-command"
+

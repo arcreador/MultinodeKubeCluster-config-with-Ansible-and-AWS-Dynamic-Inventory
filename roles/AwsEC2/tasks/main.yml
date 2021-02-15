@@ -1,0 +1,23 @@
+---
+# tasks file for AwsEC2
+
+
+- name: "launching ec2 instance"
+  ec2:
+      key_name: "{{ key_name }}"
+      instance_type: "{{ instance_type }}"
+      image: "{{ image }}"
+      region: "{{ region }}"
+      group: "{{ group }}"
+      instance_tags:
+                Name: "{{ tag }}"
+      volumes:
+      - device_name: "{{ device_name }}"
+        volume_size: "{{ volume_size }}"
+        volume_type: "{{ volume_type }}"
+      wait: yes
+      count: "{{ count }}"
+
+- name: Refresh inventory to ensure new instances exist in inventory
+  meta: refresh_inventory
+

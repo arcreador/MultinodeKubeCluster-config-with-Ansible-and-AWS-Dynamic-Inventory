@@ -1,0 +1,15 @@
+---
+# vars file for AwsEC2
+
+key_name: "aws-mumbai"
+instance_type: "t2.micro"
+image: "ami-08e0ca9924195beba"
+region: "ap-south-1"
+group: "AllowALL"
+tag: "Worker-2"    #change tag according to your convenience eg: for master : Master for worker : Worker-1/Worker-2....so on. 
+device_name: "/dev/xvda"
+volume_size: "8"
+volume_type: "gp2"
+count: "1"
+
+

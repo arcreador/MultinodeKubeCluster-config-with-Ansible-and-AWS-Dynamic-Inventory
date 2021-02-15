@@ -1,0 +1,19 @@
+---
+# vars file for kubeMaster
+url: 'https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch'
+repo_name: "Kubernetes"
+description: "yum repositoy for kube-master"
+gpgkey: "https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg"
+requirement:
+     - "docker"
+     - "kubelet"
+     - "kubeadm"
+     - "kubectl"
+     - "iproute-tc"
+
+ip: 10.244.0.0/16
+command: "kubeadm init --pod-network-cidr={{ ip }} --ignore-preflight-errors=NumCPU --ignore-preflight-errors=Mem"
+lists:
+   - "echo 3 > /proc/sys/vm/drop_caches"
+   - "kubectl apply  -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
+

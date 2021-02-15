@@ -1,0 +1,63 @@
+---
+# tasks file for kubeWorker
+
+
+- name: "setting up repo for worker node"
+  yum_repository:
+        baseurl: "{{ url }}"
+        name: "{{ repo_name }}"
+        description: "{{ description }}"
+        state: present
+        gpgcheck: yes
+        enabled: yes
+        repo_gpgcheck: yes
+        gpgkey: "{{ gpgkey }}"
+  register: repo_status
+
+- name: "install docker on kube-master"
+  package:
+        name: "{{ item }}"
+        state: present
+  loop: "{{ requirement }}"
+
+- name: "start the services of docker on kube-master"
+  service:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+  loop:
+      - "{{ requirement[0] }}"
+      - "{{ requirement[1] }}"
+
+
+- name: "copy daemon.json to /etc/docker/"
+  copy:
+       src: "daemon.json"
+       dest: "/etc/docker/"
+  register: x
+
+- name: "restart service of docker if daemon.json chenge"
+  service:
+            name: "{{ requirement[0] }}"
+            state: restarted
+  when: x.changed == true
+
+- name: "seting 1 at /etc/sysctl.d/k8s.conf"
+  copy:
+     content: "{{ mytext }}"
+     dest:  "/etc/sysctl.d/k8s.conf"
+
+- command: "sysctl --system"
+  when: repo_status.changed == true
+
+- name: "getting token from master"
+  shell: "{{ master_token }}"
+  delegate_to: "{{ groups['tag_Name_Master'][0] }}"
+  register: token
+  when: repo_status.changed == true
+
+- name: "send join request to the master node"
+  command: "{{ token.stdout }}"
+  ignore_errors: yes
+  when: repo_status.changed == true
+
